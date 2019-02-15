@@ -135,7 +135,7 @@ async function getNotify(user) {
 module.exports = async () => {
     //Connects to MySQL.
     connection = await mysql.createConnection({
-        host: "localhost",
+        host: process.settings.mysql.host,
         database: process.settings.mysql.db,
         user: process.settings.mysql.user,
         password: process.settings.mysql.pass

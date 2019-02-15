@@ -1,0 +1,45 @@
+{
+    "discord": {
+        "token": "NTQ1ODE5MDE5ODMyMTk3MTMw.D0gcNQ.c-gmtF7PaagxQOo3KYJmqoxXnzs",
+        "user": "545819019832197130"
+    },
+
+    "coin": {
+        "type": "btc",
+        "symbol": "BTC",
+        "decimals": 8,
+        "withdrawFee": 0.01,
+        "port": 8332,
+        "user": "user",
+        "pass": "pass"
+    },
+
+    "mysql": {
+        "db": "tipbot",
+        "table": "btc",
+        "user": "root",
+        "pass": "pass"
+    },
+
+    "commands": {
+        "example": [
+            "CHANNEL ID"
+        ]
+    },
+
+    "pools": {
+        "pool": {
+            "printName": "Pool",
+            "admins": [
+                "USER ID"
+            ],
+            "members": []
+        },
+
+        "giveaways": {
+            "printName": "Giveaways",
+            "admins": [],
+            "members": []
+        }
+    }
+}

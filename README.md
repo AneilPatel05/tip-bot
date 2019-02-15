@@ -1,6 +1,6 @@
 # Tip Bot
 
-### A BTC and ERC20 Tip bot made for Discord, with MySQL as a DB.
+### A BTC STEEM , STEEM-ENGINE TOKENs and ERC20 Tokens Tip bot made for Discord, with MySQL as a DB.
 
 This code is based off the modular (and not secure) ERC20 Tip Bot [here](https://github.com/kayabaNerve/erc20-tip-bot-old-unsafe). This one does not claim to be modular, yet it should be easy to modify this bot to work off other databases or coin APIs.
 
