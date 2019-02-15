@@ -121,7 +121,7 @@ async function setNotified(user) {
 
 //Returns an user's steemname.
 async function getAddress(user) {
-    return users[user].steemname;
+    return users[user].memo;
 }
 
 //Returns an user's steemname.

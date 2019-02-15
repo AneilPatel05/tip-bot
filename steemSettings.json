@@ -9,7 +9,7 @@
         "symbol": "BTC",
         "decimals": 8,
         "withdrawFee": 0.01,
-        "port": 8332,
+        "steemurl": "",
         "user": "user",
         "pass": "pass"
     },

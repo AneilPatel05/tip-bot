@@ -1,95 +1,93 @@
+//steem lib.
+var steem = require("steem");
 
-//Steem lib
-var dsteem = require('dsteem')
-
-//Steem Client
-var client ;
+//Steem RPC Client.
+var client;
 
 //RAM cache of all the addresses and TXs.
-var addresses, txs;
+var steemnames, txs;
 
-//Creates a new address.
- async function createAddress() {
-     var address = "newmemo";
-     addresses.push(address);
-     return address;
- }
+//Creates a new steemname.
+async function createAddress(steemname) {
+    addresses.push(steemname);
+    return steemname;
+}
 
-// async function ownAddress(address) {
-//     return addresses.indexOf(address) !== -1;
-// }
+async function ownAddress(steemname) {
+    return addresses.indexOf(steemname) !== -1;
+}
 
-//Gets an address's transactions.
- async function getTransactions(address) {
-    return txs[address];
- }
+//Gets an steemname's transactions.
+async function getTransactions(steemname) {
+    return txs[steemname];
+}
 
-//Sends amount to address.
-// async function send(address, amount) {
-//     try {
-//         return await client.broadcast.transfer({
-//             //TODO DSTEEM TRANSFER
-//             // voter: 'username',
-//             // author: 'almost-digital',
-//             // permlink: 'dsteem-is-the-best',
-//             // weight: 10000
-//         }, key).then(function(result){
-//            console.log('Included in block: ' + result.block_num)
-//         }, function(error) {
-//            console.error(error)
-//         })
-//     } catch(e) {
-//         return false;
-//     }
-// }
+//Sends amount to steemname.
+async function send(steemname,memo, amount) {
+    try {
+        return await steem.broadcast.transfer('STM8Uk9fB8Kty2KtPZvB4PYv9bBosTZGwL1WVqu1nqsuxhyXSFJkk', 'anlptl', steemname, amount.toFixed(3)+' STEEM', memo, function(err, result) {
+            console.log(err, result);
+          });
+    } catch(e) {
+        return false;
+    }
+}
 
 module.exports = async () => {
     //Create the client.
-    var client = new dsteem.Client('https://api.steemit.com')
-    var key = dsteem.PrivateKey.fromLogin('username', 'password', 'posting')
+    steem.api.setOptions({ url: 'https://api.steemit.com' })
 
     //Init the addresses array.
     addresses = [];
     //Init the TXs RAM cache.
     txs = {};
 
-    //Get all the TXs the owner  is having and sort them by memo.
+    //Get all the TXs the client is hosting, and sort them by steemname.
     async function getTXs() {
-        //var txsTemp = await client.listTransactions();
-        //var txsTemp = await client.database.call('get_account_history',{"account":"swapsteem", "start":-1, "limit":10000});
+        var txsTemp = await steem.api.getAccountHistory('anlptl', -1, 1, function(err, result) {
+            console.log(err, result);
+          });;
+
         //Iterate through each TX.
-        // for (var i in txsTemp) {
-        //     //If the TX has a new memo, init the new array.
-        //     if (typeof(txs[txsTemp[i].address]) === "undefined") {
-        //         txs[txsTemp[i].address] = [];
-        //     }
+        for (var i in txsTemp) {
+            //If the TX has a new steemname, init the new array.
+            if (typeof(txs[txsTemp[i].from]) === "undefined") {
+                txs[txsTemp[i].steemname] = [];
+            }
 
-        //     //Make sure the TX has 1 confirm.
-        //     // if (txsTemp[i].confirmations < 1) {
-        //     //     continue;
-        //     // }
+            //Make sure the TX has 1 confirm.
+            // if (txsTemp[i].confirmations < 1) {
+            //     continue;
+            // }
 
-        //     //Push each TX to the proper address, if it isn't already there.
-        //     if (
-        //         txs[txsTemp[i].address].map((tx) => {
-        //             return tx.txid;
-        //         }).indexOf(txsTemp[i].txid) === -1
-        //     ) {
-        //         txs[txsTemp[i].address].push(txsTemp[i]);
-        //     }
-        // }
+            //Push each TX to the proper steemname, if it isn't already there.
+            if (
+                txs[txsTemp[i].from].map((tx) => {
+                    return tx.txid;
+                }).indexOf(txsTemp[i].txid) === -1
+            ) {
+                txs[txsTemp[i].from].push(txsTemp[i]);
+            }
+        }
     }
     //Do it every thirty seconds.
     setInterval(getTXs, 30 * 1000);
     //Run it now so everything is ready.
-    //await getTXs();
+    await getTXs();
 
-    //Get each address and add it to the address array.
-    //var temp = await client.database.call('get_account_history',{"account":"swapsteem", "start":-1, "limit":10000});
-    // for (var i in temp) {
-    //     addresses.push(temp[i].address);
-    // }
+    //Get each steemname and add it to the steemname array.
+    var temp = await steem.api.getAccountHistory('anlptl', -1, 1, function(err, result) {
+        console.log(err, result);
+      });
+    for (var i in temp) {
+        addresses.push(temp[i].from);
+    }
 
     //Return the functions.
-    return { };
+    return {
+        createAddress: createAddress,
+        ownAddress: ownAddress,
+        getTransactions: getTransactions,
+        send: send
+    };
 };
