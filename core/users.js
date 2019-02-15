@@ -6,7 +6,7 @@ BN.config({
     EXPONENTIAL_AT: process.settings.coin.decimals + 1
 });
 
-//Definition of the table: `name VARCHAR(64), address VARCHAR(64), balance VARCHAR(64), notify tinyint(1)`.
+//Definition of the table: `name VARCHAR(64), steemname VARCHAR(64), balance VARCHAR(64), notify tinyint(1)`.
 
 //MySQL connection and table vars.
 var connection, table;
@@ -40,11 +40,12 @@ async function create(user) {
         return false;
     }
 
-    //Create the new user, with a blank address, balance of 0, and the notify flag on.
-    await connection.query("INSERT INTO " + table + " VALUES(?, ?, ?, ?)", [user, "", "0", 1]);
-    //Create the new user in the RAM cache, with a status of no address, balance of 0, and the notify flag on.
+    //Create the new user, with a blank steemname, memo balance of 0, and the notify flag on.
+    await connection.query("INSERT INTO " + table + " VALUES(?, ?, ?, ?, ?)", [user, "","memo", "0", 1]);
+    //Create the new user in the RAM cache, with a status of no steemname, memo, balance of 0, and the notify flag on.
     users[user] = {
-        address: false,
+        steemname: false,
+        memo: "memo",
         balance: BN(0),
         notify: true
     };
@@ -53,17 +54,18 @@ async function create(user) {
     return true;
 }
 
-//Sets an user's address.
-async function setAddress(user, address) {
-    //If they already have an addrwss, return.
-    if (typeof(users[user].address) === "string") {
+//Sets an user's steemname.
+async function setAddress(user, steemname, memo) {
+    //If they already have an addrss, return.
+    if (typeof(users[user].steemname) === "string" || typeof(users[user].memo) === "string") {
         return;
     }
 
-    //Update the table with the address.
-    await connection.query("UPDATE " + table + " SET address = ? WHERE name = ?", [address, user]);
+    //Update the table with the steemname and memo.
+    await connection.query("UPDATE " + table + " SET steemname = ? , memo = ? WHERE name = ?", [steemname,memo, user]);
     //Update the RAM cache.
-    users[user].address = address;
+    users[user].steemname = steemname;
+    users[user].memo = memo;
 }
 
 //Adds to an user's balance.
@@ -117,9 +119,14 @@ async function setNotified(user) {
     users[user].notify = false;
 }
 
-//Returns an user's address.
+//Returns an user's steemname.
 async function getAddress(user) {
-    return users[user].address;
+    return users[user].steemname;
+}
+
+//Returns an user's steemname.
+async function getMemo(user) {
+    return users[user].memo;
 }
 
 //Returns an user's balance
@@ -153,9 +160,10 @@ module.exports = async () => {
     var i;
     for (i in rows) {
         users[rows[i].name] = {
-            //If the address is an empty string, set the value to false.
-            //This is because we test if the address is a string to see if it's already set.
-            address: (rows[i].address !== "" ? rows[i].address : false),
+            //If the steemname is an empty string, set the value to false.
+            //This is because we test if the steemname is a string to see if it's already set.
+            steemname: (rows[i].steemname !== "" ? rows[i].steemname : false),
+            memo: (rows[i].memo !== "" ? rows[i].memo : false),
             //Set the balance as a BN.
             balance: BN(rows[i].balance),
             //Set the notify flag based on if the DB has a value of 0 or 1 (> 0 for safety).
@@ -163,7 +171,7 @@ module.exports = async () => {
         };
 
         //Get this user's existing TXs.
-        var txs = await process.core.coin.getTransactions(users[rows[i].name].address);
+        var txs ;//= await process.core.coin.getTransactions(users[rows[i].name].steemname);
         //Iterate over each, and push their hashes so we don't process them again.
         var x;
         for (x in txs) {
@@ -185,7 +193,7 @@ module.exports = async () => {
         addBalance: addBalance,
         subtractBalance: subtractBalance,
         setNotified: setNotified,
-
+        getMemo: getMemo,
         getAddress: getAddress,
         getBalance: getBalance,
         getNotify: getNotify
@@ -195,15 +203,15 @@ module.exports = async () => {
 //Every thirty seconds, check the TXs of each user.
 setInterval(async () => {
     for (var user in users) {
-        //If that user doesn't have an address, continue.
-        if (users[user].address === false) {
+        //If that user doesn't have an steemname, continue.
+        if (users[user].steemname === false) {
             continue;
         }
 
         //Declare the amount deposited.
         var deposited = BN(0);
         //Get the TXs.
-        var txs = await process.core.coin.getTransactions(users[user].address);
+        var txs;// = await process.core.coin.getTransactions(users[user].steemname);
 
         //Iterate over the TXs.
         var i;

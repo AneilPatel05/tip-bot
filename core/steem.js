@@ -9,20 +9,20 @@ var client ;
 var addresses, txs;
 
 //Creates a new address.
-// async function createMemo() {
-//     var address = "newmemo";
-//     addresses.push(address);
-//     return address;
-// }
+ async function createAddress() {
+     var address = "newmemo";
+     addresses.push(address);
+     return address;
+ }
 
 // async function ownAddress(address) {
 //     return addresses.indexOf(address) !== -1;
 // }
 
 //Gets an address's transactions.
-// async function getTransactions(address) {
-//     return txs[address];
-// }
+ async function getTransactions(address) {
+    return txs[address];
+ }
 
 //Sends amount to address.
 // async function send(address, amount) {
@@ -82,7 +82,7 @@ module.exports = async () => {
     //Do it every thirty seconds.
     setInterval(getTXs, 30 * 1000);
     //Run it now so everything is ready.
-    await getTXs();
+    //await getTXs();
 
     //Get each address and add it to the address array.
     //var temp = await client.database.call('get_account_history',{"account":"swapsteem", "start":-1, "limit":10000});
