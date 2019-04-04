@@ -41,11 +41,14 @@ async function create(user) {
     }
 
     //Create the new user, with a blank steemname, memo balance of 0, and the notify flag on.
-    await connection.query("INSERT INTO " + table + " VALUES(?, ?, ?, ?, ?)", [user, "","memo", "0", 1]);
+    //get memo from api or create random memo 
+    let randomString = Math.random().toString(36).substring(8);
+    console.log("random", randomString);
+    await connection.query("INSERT INTO " + table + " VALUES(?, ?, ?, ?, ?)", [user, "",randomString, "0", 1]);
     //Create the new user in the RAM cache, with a status of no steemname, memo, balance of 0, and the notify flag on.
     users[user] = {
         steemname: false,
-        memo: "memo",
+        memo: randomString,
         balance: BN(0),
         notify: true
     };
